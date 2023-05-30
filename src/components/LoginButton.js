@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import axios from 'axios';
+import { Cookies } from 'react-cookie';
+import { useNavigate } from 'react-router-dom';
+import { loginRequest } from '../controller/login/loginRequest';
 
 const StyledButton = styled.button`
   display: inline-flex;
@@ -32,21 +34,35 @@ const StyledButton = styled.button`
   }
 `;
 
-const loginReq = async (ident, password)=> {
-    const res = await axios.post('http://localhost:9091/login',{
-        ident: ident,
-        password: password,
-    }).catch((e)=> {
-        console.log(e.message);
-    })
+const LoginButton = ({ 
+  children,
+  ident,
+  password
+}) => {
 
-    console.log(res.data);
-}
+  const cookies = new Cookies();
+  const navigate = useNavigate();
 
-const LoginButton = ({ children, ...rest }) => {
+
+  const handleLoginRequest = async() => {
+    const res = await loginRequest(ident, password);
+
+    if(res?.ok === false){
+      //* Login Failed.
+      alert('Login Failed. Wrong ID or password.');
+    } else {
+      //* Proceed Login
+      //* Set userId and username in cookie.
+      //! This is just an promotion. JWT is necessary in production.
+      cookies.set('userId', res?.userId);
+      cookies.set('userName', res?.userName);
+      navigate('/main');
+    }
+  
+  }
     return <StyledButton
         onClick = {async () => {
-            await loginReq('mycheesepasta', 'test1234');
+            await handleLoginRequest();
         }}
     >{children}</StyledButton>;
 }
