@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import io from 'socket.io-client';
 
@@ -6,6 +6,7 @@ const BlankGrid = styled.div`
   height: 10px;
   border: none;
   background: none;
+  display: flex;
 `;
 
 const VoiceButton = styled.button`
@@ -83,19 +84,43 @@ const AbsPosition = styled.div`
   right: ${props => props.right};
 `;
 
-const Room = () => {
+const Room = (
+  curRoom
+) => {
     const [chatMessage, getMessage] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [room, setRoom] = useState(null);
 
     const saveMessage = event => {
         getMessage(event.target.value);
         // console.log(event.target.value);
     };
 
+    useEffect(() => {
+      setRoom(curRoom?.curRoom);
+      setLoading(setLoading(false));
+    },[curRoom, curRoom.room])
+
     return (
-        <AbsPosition top="4%">
+        loading === true
+          ? (<h1>Loading...</h1>)
+          : (<AbsPosition top="4%">
             <BlankGrid />
-            <VoiceButton>Voice</VoiceButton>
-            <CamButton>WebCam</CamButton>
+            <div style={{
+              justifyContent: 'space-between',
+              display:'flex',
+              alignItems: 'center'
+            }}>
+              <div>
+                <VoiceButton>Voice</VoiceButton>
+                <CamButton>WebCam</CamButton>
+              </div>
+              <p style={{
+                fontSize: 20,
+                marginRight: 20,
+                padding: 0,
+              }}>{`Room Code: ${room?.roomCode}`}</p>
+            </div>
             <BlankGrid />
             <ContentWindow />
             <BlankGrid />
@@ -107,7 +132,7 @@ const Room = () => {
                 onChange={saveMessage}
             />
             <SendButton>Send</SendButton>
-        </AbsPosition>
+        </AbsPosition>)
     );
 }
 

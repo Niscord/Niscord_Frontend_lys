@@ -1,11 +1,12 @@
 import React from 'react';
-import Login from './pages/Login';
-import Main from './pages/Main';
-import io from 'socket.io-client';
+import Root from './routes/root';
+import { BrowserRouter } from 'react-router-dom';
 
 const App = () => {
   return (
-    <Main />
+    <BrowserRouter>
+      <Root/>
+    </BrowserRouter>
   );
 }
 

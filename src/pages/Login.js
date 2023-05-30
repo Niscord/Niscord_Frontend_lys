@@ -81,7 +81,10 @@ const Login = () => {
                     />
                 </AbsPosition>
                 <AbsPosition top="30%" right="16%">
-                    <LoginButton>LogIn</LoginButton>
+                    <LoginButton
+                      ident={idValue}
+                      password={pwValue}
+                    >LogIn</LoginButton>
                 </AbsPosition>
                 <AbsPosition top="41%" left="67%">
                     <TextButton fontSize="5px">ID 찾기</TextButton>
