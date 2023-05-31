@@ -67,7 +67,7 @@ const Main = () => {
     if(userId !== 0){
       renewRoomInfo();
     }
-  }, [renewRoomInfo, userId])
+  }, [userId]);
 
   useEffect(() => {
     fetchUserInfo();

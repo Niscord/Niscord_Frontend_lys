@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import io from 'socket.io-client';
+import { MemberListWindow } from './chat/MemberList';
+import { inviteUserRequest } from '../controller/main/inviteUserRequest';
 
 const BlankGrid = styled.div`
   height: 10px;
@@ -33,9 +35,20 @@ const CamButton = styled.button`
   text-align: center;
 `;
 
+const InviteButton = styled.button`
+  background: #343434;
+  color: white;
+  outline: none;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+`;
+
 const ContentWindow = styled.div`
   text-align: left;
-  width: 1000px;
+  width: 750px;
   height: 550px;
   border: 2px solid black;
   border-radius: 6px;
@@ -89,17 +102,42 @@ const Room = (
 ) => {
     const [chatMessage, getMessage] = useState('');
     const [loading, setLoading] = useState(true);
+    const [inviteUserName, setInviteUserName] = useState('');
     const [room, setRoom] = useState(null);
+    const [members, setMembers] = useState([]);
 
     const saveMessage = event => {
         getMessage(event.target.value);
         // console.log(event.target.value);
     };
 
+    const handleInviteUserInput = event => {
+      setInviteUserName(event.target.value);
+    }
+
+    const inviteUser = async() => {
+      const res = await inviteUserRequest(
+        inviteUserName,
+        room?.id
+      );
+
+      if(res?.ok === false){
+        alert("Invalid User Name!");
+      }else{
+        const member = res?.member;
+        setMembers(member?.member);
+        //window.location.reload(false);
+      }
+    }
+
+
     useEffect(() => {
       setRoom(curRoom?.curRoom);
-      setLoading(setLoading(false));
-    },[curRoom, curRoom.room])
+      if(room !== null){
+        setMembers(room?.member);
+        setLoading(setLoading(false));
+      }
+    },[curRoom, curRoom.room, room])
 
     return (
         loading === true
@@ -114,6 +152,16 @@ const Room = (
               <div>
                 <VoiceButton>Voice</VoiceButton>
                 <CamButton>WebCam</CamButton>
+                <InviteButton
+                  onClick={async () => {
+                    await inviteUser();
+                  }}
+                >Invite</InviteButton>
+                <input 
+                  type='text'
+                  value={inviteUserName}
+                  onChange={handleInviteUserInput}
+                />
               </div>
               <p style={{
                 fontSize: 20,
@@ -122,7 +170,13 @@ const Room = (
               }}>{`Room Code: ${room?.roomCode}`}</p>
             </div>
             <BlankGrid />
-            <ContentWindow />
+              <div style={{
+                display: 'flex',
+                flexDirection: 'row',
+              }}>
+                <ContentWindow />
+                <MemberListWindow members = {members}/>
+              </div>
             <BlankGrid />
             <ChatBox
                 className="message"
