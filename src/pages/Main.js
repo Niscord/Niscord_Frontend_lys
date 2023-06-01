@@ -67,7 +67,7 @@ const Main = () => {
     if(userId !== 0){
       renewRoomInfo();
     }
-  }, [userId]);
+  }, [userId])
 
   useEffect(() => {
     fetchUserInfo();
@@ -93,7 +93,7 @@ const Main = () => {
               </AbsPosition>
           </LeftWrapper>
           <RightWrapper>
-              {isChatRoom1Active && <ChatRoom curRoom={clickedRoom}/>} 
+              {isChatRoom1Active && <ChatRoom curRoom={clickedRoom} curUserId={userId}/>} 
           </RightWrapper>
       </Wrapper>)
   );

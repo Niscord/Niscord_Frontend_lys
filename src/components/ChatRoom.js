@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import io from 'socket.io-client';
 import { MemberListWindow } from './chat/MemberList';
 import { inviteUserRequest } from '../controller/main/inviteUserRequest';
+import { publishMessage} from '../controller/ws/socketio';
+import {sendMessageRequest} from '../controller/chat/sendMessageRequest'
+import { readAllMessageRequest } from '../controller/chat/readAllMessageRequest';
 
 const BlankGrid = styled.div`
   height: 10px;
@@ -53,6 +56,7 @@ const ContentWindow = styled.div`
   border: 2px solid black;
   border-radius: 6px;
   background: white;
+  overflow-y: scroll;
 `;
 
 const ChatBox = styled.input`
@@ -97,15 +101,30 @@ const AbsPosition = styled.div`
   right: ${props => props.right};
 `;
 
-const Room = (
-  curRoom
-) => {
+const Room = ({
+  curRoom,
+  curUserId
+}) => {
     const [chatMessage, getMessage] = useState('');
     const [loading, setLoading] = useState(true);
     const [inviteUserName, setInviteUserName] = useState('');
     const [room, setRoom] = useState(null);
     const [members, setMembers] = useState([]);
+    const [msgList, setMsgList] = useState(null);
 
+    const readAllMessages = async(roomId) => {
+      const res = await readAllMessageRequest(
+        roomId
+      );
+
+      if(res?.ok === true){
+        const list = res?.message;
+        setMsgList(list);
+      }else if(res?.ok === false) {
+        setMsgList([]);
+      }
+    }
+    
     const saveMessage = event => {
         getMessage(event.target.value);
         // console.log(event.target.value);
@@ -130,14 +149,55 @@ const Room = (
       }
     }
 
+    const sendMessage = async () => {
+
+      const res = await sendMessageRequest(
+        curUserId,
+        room?.id,
+        chatMessage
+      );
+
+      if(res?.ok){
+        publishMessage(
+          res?.message
+        );
+      }
+
+      //* Flush message.
+      getMessage('');
+    }
+
+    const generateMsgList = () => {
+      let list = [];
+
+      msgList.forEach(message => {
+        list.push(
+        <div key={message?.id} style={{
+          padding: 10
+        }}>
+          <p>{message.payload}</p>
+        </div>)
+      });
+
+      return list;
+    }
+
 
     useEffect(() => {
-      setRoom(curRoom?.curRoom);
+      setRoom(curRoom);
       if(room !== null){
         setMembers(room?.member);
-        setLoading(setLoading(false));
+        readAllMessages(room?.id);
+        if(msgList !== null) {
+          setLoading(false);
+        }
       }
-    },[curRoom, curRoom.room, room])
+    },[curRoom, curRoom.room, msgList, room])
+
+    useEffect(() => {
+      // recvMessage(room?.id);
+      
+    }, []);
 
     return (
         loading === true
@@ -174,7 +234,9 @@ const Room = (
                 display: 'flex',
                 flexDirection: 'row',
               }}>
-                <ContentWindow />
+                <ContentWindow >
+                  {generateMsgList()}
+                </ContentWindow>
                 <MemberListWindow members = {members}/>
               </div>
             <BlankGrid />
@@ -185,7 +247,11 @@ const Room = (
                 value={chatMessage}
                 onChange={saveMessage}
             />
-            <SendButton>Send</SendButton>
+            <SendButton
+              onClick={async () => {
+                await sendMessage();
+              }}
+            >Send</SendButton>
         </AbsPosition>)
     );
 }
