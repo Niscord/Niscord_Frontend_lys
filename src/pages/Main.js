@@ -4,6 +4,9 @@ import ChatRoom from '../components/ChatRoom';
 import { generateRoomRequest } from '../controller/main/createRoom';
 import { queryAllRooms } from '../controller/main/queryRoom';
 import { Cookies } from 'react-cookie';
+import { VideoChatRoom } from '../components/videoChat/videoChatRoom';
+import { socket } from '../controller/ws/socketio';
+import { VoiceChatRoom } from '../components/voiceChat/voiceChatRoom';
 
 const Main = () => {
   const [isChatRoom1Active, setRoom1State] = useState(false)
@@ -12,6 +15,13 @@ const Main = () => {
   const [userName, setUserName] = useState(null);
   const [clickedRoom, setClickedRoom] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [openVideoChatRoom, setOpenVideoChatRoom] = useState(false);
+  const [openVoiceChatRoom, setOpenVoiceChatRoom] = useState(false);
+  const [incomingVideoCall, setIncomingVideoCall] = useState(false);
+  const [incomingVoiceCall, setIncomingVoiceCall] = useState(false);
+  const [videoSignal, setVideoSignal] = useState(null);
+  const [voiceSignal, setVoiceSignal] = useState(null);
+  const [callerId, setCallerId] = useState(null); 
 
   const cookies = new Cookies();
 
@@ -73,6 +83,32 @@ const Main = () => {
     fetchUserInfo();
   }, [fetchUserInfo]); //* Executed only once.
 
+  useEffect(() => {
+    socket.on("video_chat_call", (data) => {
+      if(data?.userToCall === userId){
+        // alert("INCOMINGCALL!");
+        setIncomingVideoCall(true);
+        setVideoSignal(data?.signal);
+        setCallerId(data?.from);
+        //console.log(vsignal);
+      }
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, socket, videoSignal])
+
+  useEffect(() => {
+    socket.on("voice_chat_call", (data) => {
+      if(data?.userToCall === userId){
+        // alert("INCOMINGCALL!");
+        setIncomingVoiceCall(true);
+        setVoiceSignal(data?.signal);
+        setCallerId(data?.from);
+        //console.log(vsignal);
+      }
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, socket, voiceSignal])
+
   return (
       loading === true
         ? (<h1>Loading...</h1>)
@@ -81,6 +117,45 @@ const Main = () => {
               <AbsPosition top="20%">
                   <Profile>{`ID: ${userName}`}</Profile>
               </AbsPosition>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'row'
+              }}>
+                {incomingVoiceCall 
+                ? <button
+                  style={{
+                    backgroundColor: '#3198FF',
+                  }}
+                  onClick={() => {
+                    setOpenVoiceChatRoom(!openVoiceChatRoom)
+                    //setIncomingVoiceCall(!incomingVoiceCall);
+                  }}
+                >
+                  <p>Incoming Voice Call!</p>
+                </button>
+                : <button
+                  onClick={() => setOpenVoiceChatRoom(!openVoiceChatRoom)}
+                >
+                  <p>Voice call</p>
+                </button>}
+                {incomingVideoCall 
+                ? <button
+                  style={{
+                    backgroundColor: '#3198FF',
+                  }}
+                  onClick={() => {
+                    setOpenVideoChatRoom(!openVideoChatRoom)
+                    //setIncomingVideoCall(!incomingVideoCall)
+                  }}
+                >
+                  <p>Incoming Video Call!</p>
+                </button>
+                : <button
+                  onClick={() => setOpenVideoChatRoom(!openVideoChatRoom)}
+                >
+                  <p>Video call</p>
+                </button>}
+              </div>
               <AbsPosition top="50%">
                   <RoomListScroll>
                       {renderRoomList()}
@@ -95,6 +170,38 @@ const Main = () => {
           <RightWrapper>
               {isChatRoom1Active && <ChatRoom curRoom={clickedRoom} curUserId={userId}/>} 
           </RightWrapper>
+          {(!incomingVoiceCall && openVoiceChatRoom) && <VoiceChatRoom 
+            recv={false}
+            isOpened={openVoiceChatRoom} 
+            setIsOpened={setOpenVoiceChatRoom} 
+            curUserId={userId}
+            setIncomingCallFlag={setIncomingVoiceCall}
+            />}
+          {(incomingVoiceCall && openVoiceChatRoom) && <VoiceChatRoom 
+            recv={true}
+            isOpened={openVoiceChatRoom} 
+            setIsOpened={setOpenVoiceChatRoom} 
+            curUserId={userId}
+            callerId={callerId}
+            signal={voiceSignal}
+            setIncomingCallFlag={setIncomingVoiceCall}
+            />}
+          {(!incomingVideoCall && openVideoChatRoom) && <VideoChatRoom 
+            recv={false}
+            isOpened={openVideoChatRoom} 
+            setIsOpened={setOpenVideoChatRoom} 
+            curUserId={userId}
+            setIncomingCallFlag={setIncomingVideoCall}
+            />}
+          {(incomingVideoCall && openVideoChatRoom) && <VideoChatRoom 
+            recv={true}
+            isOpened={openVideoChatRoom} 
+            setIsOpened={setOpenVideoChatRoom} 
+            curUserId={userId}
+            callerId={callerId}
+            signal={videoSignal}
+            setIncomingCallFlag={setIncomingVideoCall}
+            />}
       </Wrapper>)
   );
 };

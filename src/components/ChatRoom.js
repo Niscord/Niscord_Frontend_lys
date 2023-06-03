@@ -6,6 +6,7 @@ import { inviteUserRequest } from '../controller/main/inviteUserRequest';
 import { publishMessage} from '../controller/ws/socketio';
 import {sendMessageRequest} from '../controller/chat/sendMessageRequest'
 import { readAllMessageRequest } from '../controller/chat/readAllMessageRequest';
+import { VideoChatRoom } from './videoChat/videoChatRoom';
 
 const BlankGrid = styled.div`
   height: 10px;
@@ -111,6 +112,7 @@ const Room = ({
     const [room, setRoom] = useState(null);
     const [members, setMembers] = useState([]);
     const [msgList, setMsgList] = useState(null);
+    const [openVideoChatRoom, setOpenVideoChatRoom] = useState(false);
 
     const readAllMessages = async(roomId) => {
       const res = await readAllMessageRequest(
@@ -209,20 +211,6 @@ const Room = ({
               display:'flex',
               alignItems: 'center'
             }}>
-              <div>
-                <VoiceButton>Voice</VoiceButton>
-                <CamButton>WebCam</CamButton>
-                <InviteButton
-                  onClick={async () => {
-                    await inviteUser();
-                  }}
-                >Invite</InviteButton>
-                <input 
-                  type='text'
-                  value={inviteUserName}
-                  onChange={handleInviteUserInput}
-                />
-              </div>
               <p style={{
                 fontSize: 20,
                 marginRight: 20,
@@ -252,6 +240,7 @@ const Room = ({
                 await sendMessage();
               }}
             >Send</SendButton>
+            {openVideoChatRoom && <VideoChatRoom isOpened={openVideoChatRoom} setIsOpened={setOpenVideoChatRoom} curUserId={curUserId}/>}
         </AbsPosition>)
     );
 }
