@@ -50,7 +50,7 @@ const Main = () => {
   }
 
   const roomCreate = async () => {
-    const newRoom = await generateRoomRequest(1, setRoomList, roomList);
+    const newRoom = await generateRoomRequest(userId, setRoomList, roomList);
     setRoomList([...roomList, newRoom]); //* React State Update
   }
 
@@ -70,14 +70,11 @@ const Main = () => {
   }
 
   useEffect(() => {
-    console.log(roomList);
-  }, [roomList]);
-
-  useEffect(() => {
     if(userId !== 0){
       renewRoomInfo();
     }
-  }, [userId])
+  }, [userId]);
+
 
   useEffect(() => {
     fetchUserInfo();
