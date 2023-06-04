@@ -211,6 +211,21 @@ const Room = ({
               display:'flex',
               alignItems: 'center'
             }}>
+             <div
+               style={{
+                display:'flex',
+                flexDirection: 'row'
+               }}
+             >
+              <InviteButton
+                onClick={() => {
+                  inviteUser();
+                }}
+              >Invite</InviteButton>
+              <input 
+               onChange={handleInviteUserInput}
+              />
+             </div>
               <p style={{
                 fontSize: 20,
                 marginRight: 20,
