@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import LoginButton from '../components/LoginButton';
-import FindIdPw from './components/FindIdPw';
+import FindIdPw from './components/FindIdPw.js';
 import io from 'socket.io-client';
 
 const Wrapper = styled.div`
