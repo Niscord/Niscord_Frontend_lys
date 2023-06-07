@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import LoginButton from '../components/LoginButton';
-import TextButton from '../components/TextButton';
+import FindIdPw from './components/FindIdPw.js';
 import io from 'socket.io-client';
 
 const Wrapper = styled.div`
@@ -47,6 +47,7 @@ const AbsPosition = styled.div`
 const Login = () => {
     const [idValue, setId] = useState('');
     const [pwValue, setPw] = useState('');
+    const [isWindowClicked, setClickState] = useState(false);
 
     const saveUserId = event => {
         setId(event.target.value);
@@ -58,9 +59,18 @@ const Login = () => {
         // console.log(event.target.value);
     };
 
+    function switchClickState() {
+        if (isWindowClicked === false)
+            setClickState(true);
+        else
+            setClickState(false);
+    }
+
     return (
         <Wrapper>
-            <LeftWrapper>Niscord</LeftWrapper>
+            <LeftWrapper>
+                {isWindowClicked ? <FindIdPw /> : "Niscord"}
+            </LeftWrapper>
             <RightWrapper>
                 <AbsPosition top="30%" right="22%">
                     IDㅤ
@@ -86,14 +96,10 @@ const Login = () => {
                       password={pwValue}
                     >LogIn</LoginButton>
                 </AbsPosition>
-                <AbsPosition top="41%" left="67%">
-                    <TextButton fontSize="5px">ID 찾기</TextButton>
-                </AbsPosition>
-                <AbsPosition top="41%" right="26.5%">
-                    /
-                </AbsPosition>
-                <AbsPosition top="41%" right="18%">
-                    <TextButton fontSize="5px">비밀번호 찾기</TextButton>
+                <AbsPosition top="41%" left="70%">
+                    <button 
+                        onClick = {switchClickState}
+                    >{!isWindowClicked ? "ID / 비밀번호 찾기" : "ㅤㅤㅤ취소ㅤㅤㅤ"}</button>
                 </AbsPosition>
                 <AbsPosition top="91%" right="1%">
                     2023 Niscord Project
