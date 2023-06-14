@@ -143,7 +143,11 @@ const Room = ({
       );
 
       if(res?.ok === false){
-        alert("Invalid User Name!");
+        if(res?.error === 'Full'){
+          alert("Full Chatroom!");
+        }else{
+          alert("Invalid User Name!");
+        }
       }else{
         const member = res?.member;
         setMembers(member?.member);
